@@ -8,7 +8,7 @@ class AppDatePickerField extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final ValueChanged<DateTime>? onChanged;
-  final Function(String) onValidated;
+  final String? Function(DateTime?) onValidated;
   final String? serverError;
 
   const AppDatePickerField({
@@ -28,22 +28,48 @@ class AppDatePickerField extends StatefulWidget {
 
 class AppDatePickerFieldState extends State<AppDatePickerField> {
   DateTime? selectedDate;
+  late final TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
+
     selectedDate = widget.initialDate;
+
+    _controller = TextEditingController(
+      text: selectedDate == null
+          ? ''
+          : DateFormat('dd/MM/yyyy').format(selectedDate!),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant AppDatePickerField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.initialDate != widget.initialDate) {
+      selectedDate = widget.initialDate;
+
+      _controller.text = selectedDate == null
+          ? ''
+          : DateFormat('dd/MM/yyyy').format(selectedDate!);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      onTap: _pickDate,
-      controller: TextEditingController(
-        text: selectedDate == null
-            ? ''
-            : DateFormat('dd/MM/yyyy').format(selectedDate!),
-      ),
+      // readOnly: true,
+      controller: _controller,
+      cursorColor: AppColors.PrimaryBlue,
+      onTap: pickDate,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
         labelText: widget.label,
 
@@ -71,13 +97,25 @@ class AppDatePickerFieldState extends State<AppDatePickerField> {
           borderSide: const BorderSide(color: AppColors.PrimaryGold, width: 2),
         ),
 
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.Danger),
+        ),
+
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.Danger, width: 2),
+        ),
+
+        errorStyle: const TextStyle(color: AppColors.Danger, fontSize: 12),
+
         errorText: widget.serverError,
       ),
-      validator: (v) => widget.onValidated(v!),
+      validator: (_) => widget.onValidated(selectedDate),
     );
   }
 
-  Future<void> _pickDate() async {
+  Future<void> pickDate() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
@@ -128,8 +166,11 @@ class AppDatePickerFieldState extends State<AppDatePickerField> {
 
     setState(() {
       selectedDate = picked;
+      _controller.text = DateFormat('dd/MM/yyyy').format(picked);
     });
 
     widget.onChanged?.call(picked);
+
+    Form.of(context).validate();
   }
 }

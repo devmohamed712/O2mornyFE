@@ -1,6 +1,7 @@
 import 'package:O2morny/core/services/dependency_injection.dart';
 import 'package:O2morny/features/auth/data/models/send_otp_command.dart';
 import 'package:O2morny/features/auth/data/services/auth_service.dart';
+import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:O2morny/shared/widgets/app_submit_button.dart';
 import 'package:O2morny/shared/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +107,6 @@ class _SendOtpFormState extends State<SendOtpForm> {
   void showError(String msg) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(msg)));
+    ).showSnackBar(SnackBar(backgroundColor: AppColors.Danger, content: Text(msg)));
   }
 }

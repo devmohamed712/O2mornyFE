@@ -1,7 +1,7 @@
 import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class AppTextField extends StatelessWidget {
+class AppTextField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final int maxLines;
@@ -22,14 +22,19 @@ class AppTextField extends StatelessWidget {
   });
 
   @override
+  State<AppTextField> createState() => AppTextFieldState();
+}
+
+class AppTextFieldState extends State<AppTextField> {
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
+      controller: widget.controller,
+      maxLines: widget.maxLines,
+      keyboardType: widget.keyboardType,
       cursorColor: AppColors.PrimaryBlue,
       decoration: InputDecoration(
-        labelText: label,
+        labelText: widget.label,
 
         labelStyle: const TextStyle(color: AppColors.PrimaryBlue),
 
@@ -45,18 +50,20 @@ class AppTextField extends StatelessWidget {
 
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: const BorderSide(color: AppColors.Danger),
         ),
 
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
+          borderSide: const BorderSide(color: AppColors.Danger, width: 2),
         ),
 
-        errorText: serverError,
+        errorStyle: const TextStyle(color: AppColors.Danger, fontSize: 12),
+
+        errorText: widget.serverError,
       ),
-      onChanged: onChanged,
-      validator: (v) => onValidated(v!),
+      onChanged: widget.onChanged,
+      validator: (v) => widget.onValidated(v!),
     );
   }
 }

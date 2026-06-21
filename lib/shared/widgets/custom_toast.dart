@@ -1,3 +1,4 @@
+import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class CustomToast {
@@ -6,7 +7,7 @@ class CustomToast {
   }
 
   static void error(BuildContext context, String message) {
-    _show(context, message, Colors.red);
+    _show(context, message, AppColors.Danger);
   }
 
   static void _show(BuildContext context, String message, Color color) {

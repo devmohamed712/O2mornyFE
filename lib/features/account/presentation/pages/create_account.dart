@@ -13,9 +13,7 @@ import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:O2morny/shared/widgets/custom_toast.dart';
 import 'package:O2morny/features/account/data/models/create_account_request.dart';
 import 'package:O2morny/features/account/data/services/account_service.dart';
-import 'package:O2morny/features/account/presentation/widgets/national_id_picture.dart';
 import 'package:O2morny/features/account/presentation/widgets/form_section.dart';
-import 'package:O2morny/features/account/presentation/widgets/profile_picture.dart';
 import 'package:O2morny/features/city/data/models/city_dto.dart';
 import 'package:O2morny/features/country/data/models/country_dto.dart';
 import 'package:O2morny/shared/widgets/app_check_box_field.dart';
@@ -31,10 +29,10 @@ class CreateAccountPage extends StatefulWidget {
   static const route = "/create-account";
 
   @override
-  State<CreateAccountPage> createState() => _CreateAccountPageState();
+  State<CreateAccountPage> createState() => CreateAccountPageState();
 }
 
-class _CreateAccountPageState extends State<CreateAccountPage> {
+class CreateAccountPageState extends State<CreateAccountPage> {
   final AccountService accountService = getIt<AccountService>();
   final CountryService countryService = getIt<CountryService>();
   final CityService cityService = getIt<CityService>();
@@ -52,7 +50,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   bool acceptTerms = false;
   bool acceptPrivacy = false;
 
-  File? profileImage;
+  File? profilePicture;
   File? nationalIdImage;
 
   List<CountryDto> countries = [];
@@ -66,6 +64,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   bool isLoading = true;
   bool isSubmitting = false;
+
+  String? profilePictureError;
+  String? nationalIdImageError;
 
   @override
   void initState() {
@@ -110,13 +111,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      ProfilePicture(
-                        image: profileImage,
-                        onPick: pickProfileImage,
-                      ),
-
-                      const SizedBox(height: 24),
-
                       FormSection(
                         nameController: nameController,
                         nationalIdController: nationalIdController,
@@ -129,6 +123,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         cities: cities,
                         selectedRole: selectedRole,
                         roles: roles,
+                        acceptTerms: acceptTerms,
+                        acceptPrivacy: acceptPrivacy,
                         onBirthDateSelect: onBirthDateSelect,
                         onHideBirthDateChanged: (v) =>
                             setState(() => hideBirthDate = v),
@@ -136,28 +132,17 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         onCitySelect: (v) => setState(() => selectedCity = v),
                         onRoleSelect: (v) => setState(() => selectedRole = v),
                         onFieldChanged: onFieldChanged,
+                        selectedProfilePicture: profilePicture,
+                        onProfilePictureSelect: pickProfileImage,
+                        selectedNationalIdImage: nationalIdImage,
+                        onNationalIdImageSelect: pickNationalIdImage,
+                        onAcceptTermsChanged: (v) =>
+                            setState(() => acceptTerms = v),
+                        onAcceptPrivacyChanged: (v) =>
+                            setState(() => acceptPrivacy = v),
+                        profilePictureError: profilePictureError,
+                        nationalIdImageError: nationalIdImageError,
                         serverErrors: serverErrors,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      NationalIdPicture(
-                        nationalIdImage: nationalIdImage,
-                        onPick: pickNationalIdImage,
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      AppCheckBoxField(
-                        title: "Terms & Conditions",
-                        value: acceptTerms,
-                        onChanged: (v) => setState(() => acceptTerms = v),
-                      ),
-
-                      AppCheckBoxField(
-                        title: "Privacy Policy",
-                        value: acceptPrivacy,
-                        onChanged: (v) => setState(() => acceptPrivacy = v),
                       ),
 
                       const SizedBox(height: 24),
@@ -183,7 +168,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
     if (image == null) return;
 
-    setState(() => profileImage = File(image.path));
+    setState(() => profilePicture = File(image.path));
   }
 
   Future<void> pickNationalIdImage() async {
@@ -195,67 +180,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     if (image == null) return;
 
     setState(() => nationalIdImage = File(image.path));
-  }
-
-  Future<void> createAccount() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (profileImage == null ||
-        nationalIdImage == null ||
-        selectedDate == null ||
-        selectedCity == null) {
-      CustomToast.error(context, "Please fill all required fields");
-      return;
-    }
-
-    if (!acceptTerms || !acceptPrivacy) {
-      CustomToast.error(context, "Please accept terms and privacy");
-      return;
-    }
-
-    setState(() => isSubmitting = true);
-
-    final request = CreateAccountRequest(
-      Name: nameController.text.trim(),
-      NationalId: nationalIdController.text.trim(),
-      DateOfBirth: selectedDate!,
-      HideBirthDate: hideBirthDate,
-      CityId: selectedCity!.Id,
-      Address: addressController.text.trim(),
-      IsAcceptTerms: acceptTerms,
-      IsAcceptPrivacy: acceptPrivacy,
-      NationalIdPictureFile: nationalIdImage!,
-      ProfilePictureFile: profileImage!,
-      Role: selectedRole!.Name,
-    );
-
-    try {
-      AccountDto model = await accountService.create(request);
-
-      await authStorageService.saveAccount(model);
-
-      authState.account = model;
-      authState.notifyListeners();
-
-      if (context.mounted) {
-        GoRouter.of(context).go(HomePage.route);
-      }
-    } on AppException catch (e) {
-      if (context.mounted) {
-        // CustomToast.error(context, e.toString());
-        setState(() {
-          serverErrors = (e.errors ?? {}).map(
-            (key, value) => MapEntry(key.toString(), List<String>.from(value)),
-          );
-        });
-      }
-    } catch (e) {
-      if (context.mounted) {
-        CustomToast.error(context, "Something went wrong");
-      }
-    } finally {
-      setState(() => isSubmitting = false);
-    }
   }
 
   void onBirthDateSelect(DateTime dateTime) {
@@ -277,6 +201,65 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       setState(() {
         serverErrors.remove(field);
       });
+    }
+  }
+
+  Future<void> createAccount() async {
+    setState(() {
+      profilePictureError = profilePicture == null
+          ? "Profile picture is required"
+          : null;
+    });
+
+    setState(() {
+      nationalIdImageError = nationalIdImage == null
+          ? "NationalId is required"
+          : null;
+    });
+
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isSubmitting = true);
+
+    final request = CreateAccountRequest(
+      Name: nameController.text.trim(),
+      NationalId: nationalIdController.text.trim(),
+      DateOfBirth: selectedDate!,
+      HideBirthDate: hideBirthDate,
+      CityId: selectedCity!.Id,
+      Address: addressController.text.trim(),
+      IsAcceptTerms: acceptTerms,
+      IsAcceptPrivacy: acceptPrivacy,
+      NationalIdPictureFile: nationalIdImage!,
+      ProfilePictureFile: profilePicture!,
+      Role: selectedRole!.Name,
+    );
+
+    try {
+      AccountDto model = await accountService.create(request);
+
+      await authStorageService.saveAccount(model);
+
+      authState.account = model;
+      authState.notifyListeners();
+
+      if (context.mounted) {
+        GoRouter.of(context).go(HomePage.route);
+      }
+    } on AppException catch (e) {
+      if (context.mounted) {
+        setState(() {
+          serverErrors = (e.errors ?? {}).map(
+            (key, value) => MapEntry(key.toString(), List<String>.from(value)),
+          );
+        });
+      }
+    } catch (e) {
+      if (context.mounted) {
+        CustomToast.error(context, "Something went wrong");
+      }
+    } finally {
+      setState(() => isSubmitting = false);
     }
   }
 }

@@ -57,7 +57,7 @@ class AppDropDownFieldState<T> extends State<AppDropDownField<T>> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: field.hasError ? Colors.red : AppColors.PrimaryBlue,
+                    color: field.hasError ? AppColors.Danger : AppColors.PrimaryBlue,
                   ),
                 ),
                 child: Row(
@@ -80,7 +80,7 @@ class AppDropDownFieldState<T> extends State<AppDropDownField<T>> {
                 padding: const EdgeInsets.only(left: 12, top: 6),
                 child: Text(
                   field.errorText!,
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                  style: const TextStyle(color: AppColors.Danger, fontSize: 12),
                 ),
               ),
           ],

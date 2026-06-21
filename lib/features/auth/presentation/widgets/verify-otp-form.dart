@@ -110,12 +110,12 @@ class _VerifyOtpFormState extends State<VerifyOtpForm> {
 
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Colors.red),
+                    borderSide: const BorderSide(color: AppColors.Danger),
                   ),
 
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                    borderSide: const BorderSide(color: AppColors.Danger, width: 2),
                   ),
                 ),
 
@@ -171,7 +171,7 @@ class _VerifyOtpFormState extends State<VerifyOtpForm> {
   void showError(String msg) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(msg)));
+    ).showSnackBar(SnackBar(backgroundColor: AppColors.Danger, content: Text(msg)));
   }
 
   void showSuccess(String msg) {

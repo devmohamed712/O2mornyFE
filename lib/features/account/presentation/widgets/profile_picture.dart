@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 
 class ProfilePicture extends StatelessWidget {
   final File? image;
-  final VoidCallback onPick;
+  final Future<void> Function() onPick;
+  final String? errorText;
 
-  const ProfilePicture({super.key, required this.image, required this.onPick});
+  const ProfilePicture({
+    super.key,
+    required this.image,
+    required this.onPick,
+    this.errorText,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +34,14 @@ class ProfilePicture extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text("Profile Picture"),
+        if (errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              errorText!,
+              style: const TextStyle(color: AppColors.Danger, fontSize: 12),
+            ),
+          ),
       ],
     );
   }

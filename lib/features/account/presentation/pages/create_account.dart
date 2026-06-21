@@ -16,7 +16,6 @@ import 'package:O2morny/features/account/data/services/account_service.dart';
 import 'package:O2morny/features/account/presentation/widgets/form_section.dart';
 import 'package:O2morny/features/city/data/models/city_dto.dart';
 import 'package:O2morny/features/country/data/models/country_dto.dart';
-import 'package:O2morny/shared/widgets/app_check_box_field.dart';
 import 'package:O2morny/shared/widgets/custom-app_bar.dart';
 import 'package:O2morny/shared/widgets/app_submit_button.dart';
 import 'package:flutter/material.dart';

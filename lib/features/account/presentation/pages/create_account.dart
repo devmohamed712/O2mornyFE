@@ -38,7 +38,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   final AuthService authService = getIt<AuthService>();
   final AuthStorageService authStorageService = getIt<AuthStorageService>();
   final AuthState authState = getIt<AuthState>();
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
   final nationalIdController = TextEditingController();
@@ -103,7 +103,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
               )
             : Form(
                 key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.onUserInteractionIfError,
                 child: SingleChildScrollView(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
@@ -160,8 +160,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   Future<void> pickProfileImage() async {
+    profilePictureError = null;
+
     final image = await ImagePicker().pickImage(
       source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.front,
       imageQuality: 85,
     );
 
@@ -171,8 +174,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   Future<void> pickNationalIdImage() async {
+    nationalIdImageError = null;
+
     final image = await ImagePicker().pickImage(
       source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.rear,
       imageQuality: 85,
     );
 
@@ -204,6 +210,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   Future<void> createAccount() async {
+    FocusScope.of(context).unfocus();
+
     setState(() {
       profilePictureError = profilePicture == null
           ? "Profile picture is required"

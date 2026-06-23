@@ -4,6 +4,7 @@ import 'package:O2morny/features/auth/data/services/auth_service.dart';
 import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:O2morny/shared/widgets/app_submit_button.dart';
 import 'package:O2morny/shared/widgets/app_text_field.dart';
+import 'package:O2morny/shared/widgets/custom_toast.dart';
 import 'package:flutter/material.dart';
 
 class SendOtpForm extends StatefulWidget {
@@ -18,9 +19,8 @@ class SendOtpForm extends StatefulWidget {
 class _SendOtpFormState extends State<SendOtpForm> {
   final AuthService authService = getIt<AuthService>();
   final countryCodeController = TextEditingController(text: "+20");
-
   final phoneController = TextEditingController();
-
+  bool validationError = false;
   bool isSubmitting = false;
 
   @override
@@ -45,7 +45,12 @@ class _SendOtpFormState extends State<SendOtpForm> {
               child: AppTextField(
                 controller: countryCodeController,
                 label: "Code",
-                keyboardType: TextInputType.number,
+                // keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    validationError = false;
+                  });
+                },
                 onValidated: (p0) {},
               ),
             ),
@@ -58,11 +63,30 @@ class _SendOtpFormState extends State<SendOtpForm> {
                 controller: phoneController,
                 label: "Phone Number",
                 keyboardType: TextInputType.phone,
+                onChanged: (value) {
+                  setState(() {
+                    validationError = false;
+                  });
+                },
                 onValidated: (p0) {},
               ),
             ),
           ],
         ),
+
+        const SizedBox(height: 24),
+
+        if (validationError) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Country code and Phone number is required",
+                style: TextStyle(color: AppColors.Danger, fontSize: 12),
+              ),
+            ],
+          ),
+        ],
 
         const SizedBox(height: 24),
 
@@ -78,8 +102,13 @@ class _SendOtpFormState extends State<SendOtpForm> {
   Future<void> sendOtp() async {
     FocusScope.of(context).unfocus();
 
-    if (phoneController.text.trim().isEmpty) {
-      showError("Enter phone number");
+    if (phoneController.text.trim().isEmpty ||
+        countryCodeController.text.trim().isEmpty) {
+      if (context.mounted) {
+        setState(() {
+          validationError = true;
+        });
+      }
       return;
     }
 
@@ -94,7 +123,9 @@ class _SendOtpFormState extends State<SendOtpForm> {
 
       widget.onOtpSent(phone: fullPhone);
     } catch (e) {
-      showError(e.toString());
+      if (context.mounted) {
+        CustomToast.error(context, "Something went wrong");
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -102,11 +133,5 @@ class _SendOtpFormState extends State<SendOtpForm> {
         });
       }
     }
-  }
-
-  void showError(String msg) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(backgroundColor: AppColors.Danger, content: Text(msg)));
   }
 }

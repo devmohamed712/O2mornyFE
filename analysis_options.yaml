@@ -9,6 +9,7 @@
 # packages, and plugins designed to encourage good coding practices.
 analyzer:
   errors:
+    annotate_overrides: ignore
     avoid_init_to_null: ignore
     avoid_print: ignore
     await_only_futures: ignore
@@ -25,6 +26,7 @@ analyzer:
     prefer_const_constructors_in_immutables: ignore
     prefer_final_fields: ignore
     prefer_interpolation_to_compose_strings: ignore
+    prefer_is_not_empty: ignore
     sized_box_for_whitespace: ignore
     strict_top_level_inference: ignore
     unnecessary_brace_in_string_interps: ignore

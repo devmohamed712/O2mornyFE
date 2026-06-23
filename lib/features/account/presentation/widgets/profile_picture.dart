@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePicture extends StatelessWidget {
+class ProfilePicture extends StatefulWidget {
   final File? image;
   final Future<void> Function() onPick;
-  final String? errorText;
+  String? errorText = null;
 
-  const ProfilePicture({
+  ProfilePicture({
     super.key,
     required this.image,
     required this.onPick,
@@ -15,15 +15,29 @@ class ProfilePicture extends StatelessWidget {
   });
 
   @override
+  State<ProfilePicture> createState() => ProfilePictureState();
+}
+
+class ProfilePictureState extends State<ProfilePicture> {
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         GestureDetector(
-          onTap: onPick,
+          onTap: () {
+            if (mounted) {
+              setState(() {
+                widget.errorText = null;
+              });
+            }
+            widget.onPick();
+          },
           child: CircleAvatar(
             radius: 55,
-            backgroundImage: image != null ? FileImage(image!) : null,
-            child: image == null
+            backgroundImage: widget.image != null
+                ? FileImage(widget.image!)
+                : null,
+            child: widget.image == null
                 ? const Icon(
                     Icons.person,
                     size: 50,
@@ -34,11 +48,11 @@ class ProfilePicture extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text("Profile Picture"),
-        if (errorText != null)
+        if (widget.errorText != null)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              errorText!,
+              widget.errorText!,
               style: const TextStyle(color: AppColors.Danger, fontSize: 12),
             ),
           ),

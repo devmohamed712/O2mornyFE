@@ -63,7 +63,7 @@ class AppTextFieldState extends State<AppTextField> {
         errorText: widget.serverError,
       ),
       onChanged: widget.onChanged,
-      validator: (v) => widget.onValidated(v!),
+      validator: (v) => widget.onValidated(v ?? ''),
     );
   }
 }

@@ -12,6 +12,8 @@ class CreateAccountRequest {
   final File NationalIdPictureFile;
   final File ProfilePictureFile;
   final String Role;
+  double? ServiceProviderExperienceYears;
+  String? ServiceProviderDescription;
 
   CreateAccountRequest({
     required this.Name,
@@ -25,5 +27,7 @@ class CreateAccountRequest {
     required this.NationalIdPictureFile,
     required this.ProfilePictureFile,
     required this.Role,
+    this.ServiceProviderExperienceYears,
+    this.ServiceProviderDescription,
   });
 }

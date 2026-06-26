@@ -170,7 +170,5 @@ class AppDatePickerFieldState extends State<AppDatePickerField> {
     });
 
     widget.onChanged?.call(picked);
-
-    Form.of(context).validate();
   }
 }

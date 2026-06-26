@@ -11,6 +11,8 @@ class AccountDto {
   final String Address;
   final String ProfilePicture;
   final AccountStatus Status;
+  double? ServiceProviderExperienceYears;
+  String? ServiceProviderDescription;
 
   AccountDto({
     required this.Id,
@@ -23,6 +25,8 @@ class AccountDto {
     required this.Address,
     required this.ProfilePicture,
     required this.Status,
+    this.ServiceProviderExperienceYears,
+    this.ServiceProviderDescription,
   });
 
   factory AccountDto.fromJson(Map<String, dynamic> json) {
@@ -37,6 +41,8 @@ class AccountDto {
       Address: json['Address'],
       ProfilePicture: json['ProfilePicture'],
       Status: AccountStatus.values[json['Status']],
+      ServiceProviderExperienceYears: json['ServiceProviderExperienceYears'],
+      ServiceProviderDescription: json['ServiceProviderDescription'],
     );
   }
 
@@ -52,6 +58,8 @@ class AccountDto {
       'Address': Address,
       'ProfilePicture': ProfilePicture,
       'Status': Status.index,
+      'ServiceProviderExperienceYears': ServiceProviderExperienceYears,
+      'ServiceProviderDescription': ServiceProviderDescription
     };
   }
 }

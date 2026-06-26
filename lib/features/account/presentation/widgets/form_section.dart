@@ -1,12 +1,13 @@
 import 'dart:io';
-
 import 'package:O2morny/features/account/presentation/widgets/national_id_picture.dart';
 import 'package:O2morny/features/account/presentation/widgets/profile_picture.dart';
 import 'package:O2morny/features/auth/data/models/role_dto.dart';
+import 'package:O2morny/shared/enums.dart';
 import 'package:O2morny/shared/widgets/app_check_box_field.dart';
 import 'package:O2morny/shared/widgets/app_date_picker_field.dart';
 import 'package:O2morny/features/city/data/models/city_dto.dart';
 import 'package:O2morny/features/country/data/models/country_dto.dart';
+import 'package:O2morny/shared/widgets/app_slider_bar_field.dart';
 import 'package:O2morny/shared/widgets/app_text_field.dart';
 import 'package:O2morny/shared/widgets/app_drop_down_field.dart';
 import 'package:flutter/material.dart';
@@ -15,19 +16,13 @@ class FormSection extends StatefulWidget {
   final TextEditingController nameController;
   final TextEditingController nationalIdController;
   final TextEditingController addressController;
-
-  DateTime? selectedDate;
-  final bool hideBirthDate;
   final File? selectedProfilePicture;
-  final CountryDto? selectedCountry;
   final List<CountryDto> countries;
-  final CityDto? selectedCity;
   final List<CityDto> cities;
   final RoleDto? selectedRole;
+  final TextEditingController serviceProviderDescriptionController;
   final List<RoleDto> roles;
   final File? selectedNationalIdImage;
-  final bool acceptTerms;
-  final bool acceptPrivacy;
 
   final Future<void> Function() onProfilePictureSelect;
   final Function(DateTime) onBirthDateSelect;
@@ -35,6 +30,7 @@ class FormSection extends StatefulWidget {
   final Function(CountryDto) onCountrySelect;
   final Function(CityDto) onCitySelect;
   final Function(RoleDto) onRoleSelect;
+  Function(double)? onServiceProviderYearsOfExpSelect;
   final Future<void> Function() onNationalIdImageSelect;
   final Function(String fieldName)? onFieldChanged;
   final Function(bool) onAcceptTermsChanged;
@@ -50,23 +46,19 @@ class FormSection extends StatefulWidget {
     required this.nameController,
     required this.nationalIdController,
     required this.addressController,
-    required this.selectedDate,
-    required this.hideBirthDate,
-    required this.selectedCountry,
     required this.countries,
-    required this.selectedCity,
     required this.cities,
     required this.selectedRole,
+    required this.serviceProviderDescriptionController,
     required this.selectedNationalIdImage,
     required this.roles,
-    required this.acceptTerms,
-    required this.acceptPrivacy,
     required this.onProfilePictureSelect,
     required this.onBirthDateSelect,
     required this.onHideBirthDateChanged,
     required this.onCountrySelect,
     required this.onCitySelect,
     required this.onRoleSelect,
+    this.onServiceProviderYearsOfExpSelect,
     required this.onNationalIdImageSelect,
     required this.onFieldChanged,
     required this.onAcceptTermsChanged,
@@ -100,7 +92,7 @@ class FormSectionState extends State<FormSection> {
           onValidated: (value) {
             if (value.isEmpty) {
               return "Full name is required.";
-            } else if (value.length > 256) {
+            } else if (value.length >= 256) {
               return "Full name shouldn't exceed 256 characters.";
             }
             return null;
@@ -118,7 +110,7 @@ class FormSectionState extends State<FormSection> {
           onValidated: (value) {
             if (value.isEmpty) {
               return "National id is required.";
-            } else if (value.length > 128) {
+            } else if (value.length >= 128) {
               return "National id shouldn't exceed 128 characters.";
             }
             return null;
@@ -129,14 +121,10 @@ class FormSectionState extends State<FormSection> {
         const SizedBox(height: 12),
 
         AppDatePickerField(
-          initialDate: widget.selectedDate,
           firstDate: DateTime(1900),
           lastDate: DateTime.now(),
           onChanged: (date) {
             widget.onFieldChanged?.call("DateOfBirth");
-
-            widget.selectedDate = date;
-
             widget.onBirthDateSelect(date);
           },
           onValidated: (date) {
@@ -153,7 +141,7 @@ class FormSectionState extends State<FormSection> {
 
         AppCheckBoxField(
           title: "Hide Birth Date",
-          initialValue: widget.hideBirthDate,
+          initialValue: false,
           onChanged: (v) => widget.onHideBirthDateChanged(v ?? false),
         ),
 
@@ -176,8 +164,53 @@ class FormSectionState extends State<FormSection> {
 
         const SizedBox(height: 12),
 
+        if (widget.selectedRole != null &&
+            widget.selectedRole!.Name == Roles.ServiceProvider.value) ...[
+          const SizedBox(height: 12),
+
+          AppSliderBarField(
+            title: 'Years of Experience',
+            initialValue: 0.0,
+            onChanged: widget.onServiceProviderYearsOfExpSelect!,
+            validator: (value) {
+              if (widget.selectedRole != null && widget.selectedRole!.Name != Roles.ServiceProvider.value) {
+                return null;
+              }
+              if (value == null || value < 0) {
+                return 'Experience is required';
+              }
+              return null;
+            },
+          ),
+
+          const SizedBox(height: 12),
+
+          AppTextField(
+            controller: widget.serviceProviderDescriptionController,
+            label: "Description",
+            maxLines: 3,
+            onChanged: (_) =>
+                widget.onFieldChanged?.call("ServiceProviderDescription"),
+            onValidated: (value) {
+              if (widget.selectedRole != null && widget.selectedRole!.Name != Roles.ServiceProvider.value) {
+                return null;
+              }
+              if (value.isEmpty) {
+                return "Description is required.";
+              } else if (value.length >= 4000) {
+                return "Description shouldn't exceed 4000 characters.";
+              }
+              return null;
+            },
+            serverError:
+                widget.serverErrors["ServiceProviderDescription"]?.first,
+          ),
+
+          const SizedBox(height: 24),
+        ],
+
         AppDropDownField<CountryDto>(
-          selected: widget.selectedCountry,
+          selected: null,
           lst: widget.countries,
           hint: "Select Country",
           onSelect: widget.onCountrySelect,
@@ -194,7 +227,7 @@ class FormSectionState extends State<FormSection> {
         const SizedBox(height: 12),
 
         AppDropDownField<CityDto>(
-          selected: widget.selectedCity,
+          selected: null,
           lst: widget.cities,
           hint: "Select City",
           onSelect: widget.onCitySelect,
@@ -218,7 +251,7 @@ class FormSectionState extends State<FormSection> {
           onValidated: (value) {
             if (value.isEmpty) {
               return "Address is required.";
-            } else if (value.length > 512) {
+            } else if (value.length >= 512) {
               return "Address shouldn't exceed 512 characters.";
             }
             return null;
@@ -238,14 +271,14 @@ class FormSectionState extends State<FormSection> {
 
         AppCheckBoxField(
           title: "Terms & Conditions",
-          initialValue: widget.acceptTerms,
+          initialValue: false,
           onChanged: (v) => widget.onAcceptTermsChanged(v ?? false),
           errorText: "You must accept the Terms & Conditions to continue",
         ),
 
         AppCheckBoxField(
           title: "Privacy Policy",
-          initialValue: widget.acceptPrivacy,
+          initialValue: false,
           onChanged: (v) => widget.onAcceptPrivacyChanged(v ?? false),
           errorText: "You must accept the Privacy Policy to proceed",
         ),

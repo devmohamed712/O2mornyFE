@@ -5,7 +5,7 @@ class AppColors {
 
   static const Color PrimaryGold = Color(0xFFF2D06B);
 
-  static const Color Background = Color(0xFF0B0B0B);
+  static const Color Dark = Colors.black;
 
   static const Light = Colors.white;
 

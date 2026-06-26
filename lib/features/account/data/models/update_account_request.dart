@@ -7,6 +7,9 @@ class UpdateAccountRequest {
   final int CityId;
   final String Address;
   final File ProfilePictureFile;
+  final String Role;
+  double? ServiceProviderExperienceYears;
+  String? ServiceProviderDescription;
 
   UpdateAccountRequest({
     required this.Name,
@@ -15,5 +18,8 @@ class UpdateAccountRequest {
     required this.CityId,
     required this.Address,
     required this.ProfilePictureFile,
+    required this.Role,
+    this.ServiceProviderExperienceYears,
+    this.ServiceProviderDescription,
   });
 }

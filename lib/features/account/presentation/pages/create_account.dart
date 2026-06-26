@@ -9,6 +9,7 @@ import 'package:O2morny/features/auth/data/services/auth_storage_service.dart';
 import 'package:O2morny/features/city/data/services/city_service.dart';
 import 'package:O2morny/features/country/data/services/country_service.dart';
 import 'package:O2morny/features/home/presentation/pages/home.dart';
+import 'package:O2morny/shared/enums.dart';
 import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:O2morny/shared/widgets/custom_toast.dart';
 import 'package:O2morny/features/account/data/models/create_account_request.dart';
@@ -58,6 +59,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   CityDto? selectedCity;
   List<RoleDto> roles = [];
   RoleDto? selectedRole;
+  double selectedServiceProviderYearsOfExp = 0.0;
+  final serviceProviderDescriptionController = TextEditingController();
 
   Map<String, List<String>> serverErrors = {};
 
@@ -114,31 +117,24 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                         nameController: nameController,
                         nationalIdController: nationalIdController,
                         addressController: addressController,
-                        selectedDate: selectedDate,
-                        hideBirthDate: hideBirthDate,
-                        selectedCountry: selectedCountry,
                         countries: countries,
-                        selectedCity: selectedCity,
                         cities: cities,
                         selectedRole: selectedRole,
                         roles: roles,
-                        acceptTerms: acceptTerms,
-                        acceptPrivacy: acceptPrivacy,
                         onBirthDateSelect: onBirthDateSelect,
-                        onHideBirthDateChanged: (v) =>
-                            setState(() => hideBirthDate = v),
+                        onHideBirthDateChanged: (v) => setState(() => hideBirthDate = v),
                         onCountrySelect: onCountrySelect,
                         onCitySelect: (v) => setState(() => selectedCity = v),
                         onRoleSelect: (v) => setState(() => selectedRole = v),
+                        onServiceProviderYearsOfExpSelect: (v) => setState(() => selectedServiceProviderYearsOfExp = v),
+                        serviceProviderDescriptionController: serviceProviderDescriptionController,
                         onFieldChanged: onFieldChanged,
                         selectedProfilePicture: profilePicture,
                         onProfilePictureSelect: pickProfileImage,
                         selectedNationalIdImage: nationalIdImage,
                         onNationalIdImageSelect: pickNationalIdImage,
-                        onAcceptTermsChanged: (v) =>
-                            setState(() => acceptTerms = v),
-                        onAcceptPrivacyChanged: (v) =>
-                            setState(() => acceptPrivacy = v),
+                        onAcceptTermsChanged: (v) => setState(() => acceptTerms = v),
+                        onAcceptPrivacyChanged: (v) => setState(() => acceptPrivacy = v),
                         profilePictureError: profilePictureError,
                         nationalIdImageError: nationalIdImageError,
                         serverErrors: serverErrors,
@@ -240,6 +236,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       NationalIdPictureFile: nationalIdImage!,
       ProfilePictureFile: profilePicture!,
       Role: selectedRole!.Name,
+      ServiceProviderExperienceYears:
+          selectedRole!.Name == Roles.ServiceProvider.value ? selectedServiceProviderYearsOfExp : null,
+      ServiceProviderDescription: selectedRole!.Name == Roles.ServiceProvider.value
+          ? serviceProviderDescriptionController.text.trim()
+          : null,
     );
 
     try {

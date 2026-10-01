@@ -11,7 +11,9 @@ class AuthResponse {
     return AuthResponse(
       Token: json['Token'],
       Role: json['Role'],
-      Account: json['Account'],
+      Account: json['Account'] == null
+          ? null
+          : AccountDto.fromJson(json['Account'] as Map<String, dynamic>),
     );
   }
 }

@@ -33,7 +33,6 @@ class AuthService {
         '${apiAuthUrl}verify-otp',
         data: request.toJson(),
       );
-
       return AuthResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw AppException(e.response?.data?.toString() ?? 'Verification failed');

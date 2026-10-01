@@ -9,10 +9,10 @@ class LoginPage extends StatefulWidget {
   static const route = "/login";
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginPage> createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   bool otpMode = false;
   String fullPhone = "";
   String? userImage;

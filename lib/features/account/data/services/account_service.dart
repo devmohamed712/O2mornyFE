@@ -4,7 +4,6 @@ import 'package:O2morny/features/account/data/models/account_dto.dart';
 import 'package:O2morny/features/account/data/models/create_account_request.dart';
 import 'package:O2morny/features/account/data/models/update_account_request.dart';
 import 'package:O2morny/features/auth/data/services/auth_storage_service.dart';
-import 'package:O2morny/shared/enums.dart';
 import 'package:dio/dio.dart';
 import 'package:O2morny/core/network/api_constants.dart';
 
@@ -21,30 +20,15 @@ class AccountService {
     try {
       final formData = FormData.fromMap({
         "Name": request.Name,
-        "NationalId": request.NationalId,
         "DateOfBirth": request.DateOfBirth.toIso8601String(),
-        "HideBirthDate": request.HideBirthDate,
         "CityId": request.CityId,
         "Address": request.Address,
         "IsAcceptTerms": request.IsAcceptTerms,
         "IsAcceptPrivacy": request.IsAcceptPrivacy,
-        "Role": request.Role,
-
-        "NationalIdPictureFile": await MultipartFile.fromFile(
-          request.NationalIdPictureFile.path,
-        ),
 
         "ProfilePictureFile": await MultipartFile.fromFile(
           request.ProfilePictureFile.path,
         ),
-        "ServiceProviderExperienceYears":
-            request.Role == Roles.ServiceProvider.value
-            ? request.ServiceProviderExperienceYears
-            : null,
-        "ServiceProviderDescription":
-            request.Role == Roles.ServiceProvider.value
-            ? request.ServiceProviderDescription
-            : null,
       });
 
       final response = await dio.post(apiAccountUrl, data: formData);
@@ -73,7 +57,6 @@ class AccountService {
       final formData = FormData.fromMap({
         "Name": request.Name,
         "DateOfBirth": request.DateOfBirth.toIso8601String(),
-        "HideBirthDate": request.HideBirthDate,
         "CityId": request.CityId,
         "Address": request.Address,
 

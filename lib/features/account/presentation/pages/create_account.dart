@@ -3,13 +3,11 @@ import 'package:O2morny/core/exceptions/app_exception.dart';
 import 'package:O2morny/core/routing/auth_state.dart';
 import 'package:O2morny/core/services/dependency_injection.dart';
 import 'package:O2morny/features/account/data/models/account_dto.dart';
-import 'package:O2morny/features/auth/data/models/role_dto.dart';
 import 'package:O2morny/features/auth/data/services/auth_service.dart';
 import 'package:O2morny/features/auth/data/services/auth_storage_service.dart';
 import 'package:O2morny/features/city/data/services/city_service.dart';
 import 'package:O2morny/features/country/data/services/country_service.dart';
 import 'package:O2morny/features/home/presentation/pages/home.dart';
-import 'package:O2morny/shared/enums.dart';
 import 'package:O2morny/shared/models/app_colors.dart';
 import 'package:O2morny/shared/widgets/custom_toast.dart';
 import 'package:O2morny/features/account/data/models/create_account_request.dart';
@@ -42,11 +40,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
-  final nationalIdController = TextEditingController();
   final addressController = TextEditingController();
 
   DateTime? selectedDate;
-  bool hideBirthDate = false;
   bool acceptTerms = false;
   bool acceptPrivacy = false;
 
@@ -57,10 +53,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   CountryDto? selectedCountry;
   List<CityDto> cities = [];
   CityDto? selectedCity;
-  List<RoleDto> roles = [];
-  RoleDto? selectedRole;
-  double selectedServiceProviderYearsOfExp = 0.0;
-  final serviceProviderDescriptionController = TextEditingController();
 
   Map<String, List<String>> serverErrors = {};
 
@@ -68,14 +60,12 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   bool isSubmitting = false;
 
   String? profilePictureError;
-  String? nationalIdImageError;
 
   @override
   void initState() {
     super.initState();
 
     Future.delayed(Duration.zero, () async {
-      roles = await authService.getRoles();
       countries = await countryService.getAll();
 
       setState(() {
@@ -87,7 +77,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   @override
   void dispose() {
     nameController.dispose();
-    nationalIdController.dispose();
     addressController.dispose();
     super.dispose();
   }
@@ -115,28 +104,20 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     children: [
                       FormSection(
                         nameController: nameController,
-                        nationalIdController: nationalIdController,
                         addressController: addressController,
                         countries: countries,
                         cities: cities,
-                        selectedRole: selectedRole,
-                        roles: roles,
                         onBirthDateSelect: onBirthDateSelect,
-                        onHideBirthDateChanged: (v) => setState(() => hideBirthDate = v),
                         onCountrySelect: onCountrySelect,
                         onCitySelect: (v) => setState(() => selectedCity = v),
-                        onRoleSelect: (v) => setState(() => selectedRole = v),
-                        onServiceProviderYearsOfExpSelect: (v) => setState(() => selectedServiceProviderYearsOfExp = v),
-                        serviceProviderDescriptionController: serviceProviderDescriptionController,
                         onFieldChanged: onFieldChanged,
                         selectedProfilePicture: profilePicture,
                         onProfilePictureSelect: pickProfileImage,
-                        selectedNationalIdImage: nationalIdImage,
-                        onNationalIdImageSelect: pickNationalIdImage,
+                        selectedCountry: selectedCountry,
+                        selectedCity: selectedCity,
                         onAcceptTermsChanged: (v) => setState(() => acceptTerms = v),
                         onAcceptPrivacyChanged: (v) => setState(() => acceptPrivacy = v),
                         profilePictureError: profilePictureError,
-                        nationalIdImageError: nationalIdImageError,
                         serverErrors: serverErrors,
                       ),
 
@@ -159,28 +140,12 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     profilePictureError = null;
 
     final image = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.front,
-      imageQuality: 85,
+      source: ImageSource.gallery,
     );
 
     if (image == null) return;
 
     setState(() => profilePicture = File(image.path));
-  }
-
-  Future<void> pickNationalIdImage() async {
-    nationalIdImageError = null;
-
-    final image = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.rear,
-      imageQuality: 85,
-    );
-
-    if (image == null) return;
-
-    setState(() => nationalIdImage = File(image.path));
   }
 
   void onBirthDateSelect(DateTime dateTime) {
@@ -190,7 +155,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   }
 
   Future<void> onCountrySelect(CountryDto country) async {
-    cities = await cityService.getAll(country.Id);
+    cities = await cityService.getAll(country.Id!);
     setState(() {
       selectedCountry = country;
       selectedCity = null;
@@ -214,33 +179,18 @@ class CreateAccountPageState extends State<CreateAccountPage> {
           : null;
     });
 
-    setState(() {
-      nationalIdImageError = nationalIdImage == null
-          ? "NationalId is required"
-          : null;
-    });
-
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => isSubmitting = true);
 
     final request = CreateAccountRequest(
       Name: nameController.text.trim(),
-      NationalId: nationalIdController.text.trim(),
       DateOfBirth: selectedDate!,
-      HideBirthDate: hideBirthDate,
       CityId: selectedCity!.Id,
       Address: addressController.text.trim(),
       IsAcceptTerms: acceptTerms,
       IsAcceptPrivacy: acceptPrivacy,
-      NationalIdPictureFile: nationalIdImage!,
       ProfilePictureFile: profilePicture!,
-      Role: selectedRole!.Name,
-      ServiceProviderExperienceYears:
-          selectedRole!.Name == Roles.ServiceProvider.value ? selectedServiceProviderYearsOfExp : null,
-      ServiceProviderDescription: selectedRole!.Name == Roles.ServiceProvider.value
-          ? serviceProviderDescriptionController.text.trim()
-          : null,
     );
 
     try {
@@ -264,7 +214,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       }
     } catch (e) {
       if (context.mounted) {
-        CustomToast.error(context, "Something went wrong");
+        CustomToast.error(context, e.toString());
       }
     } finally {
       setState(() => isSubmitting = false);

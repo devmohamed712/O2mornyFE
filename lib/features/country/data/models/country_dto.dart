@@ -1,12 +1,16 @@
-class CountryDto{
-  final int Id;
+class CountryDto {
+  final int? Id;
   final String EnName;
   final String ArName;
+  final String? Code;
+  final String? FlagPicture;
 
   CountryDto({
-    required this.Id,
+    this.Id,
     required this.EnName,
     required this.ArName,
+    this.Code,
+    this.FlagPicture,
   });
 
   factory CountryDto.fromJson(Map<String, dynamic> json) {
